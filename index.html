@@ -8661,9 +8661,9 @@
                     const currentGain = currentCapital - challenge.startingCapital;
                     const progressPercent = Math.min(100, Math.max(0, (currentGain / targetGain) * 100));
                     
-                    // Calculate daily target based on weekdays only
-                    const totalWeekdays = getWeekdaysBetween(startDate, endDate);
-                    const dailyTarget = totalWeekdays > 0 ? targetGain / totalWeekdays : 0;
+                    // Calculate dynamic daily target based on current progress and days remaining
+                    const remainingGain = challenge.targetCapital - currentCapital;
+                    const dynamicDailyTarget = daysRemaining > 0 ? remainingGain / daysRemaining : 0;
                     
                     // Calculate win rate for challenge period
                     const challengeTrades = closedTrades.filter(t => {
@@ -8678,7 +8678,7 @@
                     document.getElementById('challenge-end-date').textContent = endDate.toLocaleDateString();
                     document.getElementById('challenge-current-capital').textContent = formatCurrency(currentCapital);
                     document.getElementById('challenge-target-capital').textContent = `Target: ${formatCurrency(challenge.targetCapital)}`;
-                    document.getElementById('challenge-daily-target').textContent = formatCurrency(dailyTarget);
+                    document.getElementById('challenge-daily-target').textContent = formatCurrency(dynamicDailyTarget);
                     document.getElementById('challenge-win-rate').textContent = `${winRate.toFixed(1)}%`;
                     document.getElementById('challenge-progress-percent').textContent = `${progressPercent.toFixed(0)}%`;
                     
