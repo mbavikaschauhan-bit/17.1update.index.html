@@ -2975,7 +2975,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="challenge-inactive-container" class="flex flex-col items-center justify-center p-12 text-center" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 0.5rem;">
+                            
+                            <!-- Loading State Container -->
+                            <div id="challenge-loading-container" class="flex flex-col items-center justify-center p-12 text-center" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 0.5rem;">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 mb-4" style="border-color: var(--text-primary);"></div>
+                                <p class="text-sm" style="color: var(--text-secondary);">Loading challenge data...</p>
+                            </div>
+                            
+                            <div id="challenge-inactive-container" class="flex flex-col items-center justify-center p-12 text-center hidden" style="background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 0.5rem;">
                                 <i data-feather="award" class="h-16 w-16 mb-4" style="color: var(--text-muted);"></i>
                                 <h3 class="text-xl font-semibold mb-2" style="color: var(--text-primary);">No Active Challenge</h3>
                                 <p class="text-sm mb-6" style="color: var(--text-secondary);">Set a new challenge to track your progress towards a specific goal.</p>
@@ -8615,6 +8622,7 @@
                     const challenge = appState.challenge;
                     const activeContainer = document.getElementById('challenge-active-container');
                     const inactiveContainer = document.getElementById('challenge-inactive-container');
+                    const loadingContainer = document.getElementById('challenge-loading-container');
                 
                 // Get theme colors for chart rendering
                 const themeColors = getThemeColors();
@@ -8622,14 +8630,10 @@
                 console.log('renderChallenge called - Challenge:', challenge, 'Trades count:', appState.trades?.length || 0);
                 
                 if (challenge && challenge.id) {
-                    // Show active challenge - only toggle if state actually changed
-                    const shouldShowActive = true;
-                    const currentlyActive = !activeContainer.classList.contains('hidden');
-                    
-                    if (shouldShowActive !== currentlyActive) {
-                        activeContainer.classList.toggle('hidden', !shouldShowActive);
-                        inactiveContainer.classList.toggle('hidden', shouldShowActive);
-                    }
+                    // Show active challenge - hide loading and inactive, show active
+                    activeContainer.classList.remove('hidden');
+                    inactiveContainer.classList.add('hidden');
+                    loadingContainer.classList.add('hidden');
                     
                     const now = new Date();
                     const startDate = new Date(challenge.startDate);
@@ -8828,14 +8832,10 @@
                     }
                     
                 } else {
-                    // Show inactive state - only toggle if state actually changed
-                    const shouldShowActive = false;
-                    const currentlyActive = !activeContainer.classList.contains('hidden');
-                    
-                    if (shouldShowActive !== currentlyActive) {
-                        activeContainer.classList.toggle('hidden', !shouldShowActive);
-                        inactiveContainer.classList.toggle('hidden', shouldShowActive);
-                    }
+                    // Show inactive state - hide loading and active, show inactive
+                    activeContainer.classList.add('hidden');
+                    inactiveContainer.classList.remove('hidden');
+                    loadingContainer.classList.add('hidden');
                 }
                 } catch (e) {
                     console.error('renderChallenge error', e);
