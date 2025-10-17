@@ -8737,18 +8737,23 @@
                         }
                     }
                     
-                    // Calculate additional metrics
+                    // Calculate additional metrics - only for trades with both stop loss and target
                     const avgRR = challengeTrades.length > 0 ? 
                         challengeTrades.reduce((sum, t) => {
                             const entryPrice = t.entry_price || 0;
-                            const stopLoss = t.stop_loss || (entryPrice * 0.98);
-                            const target = t.target_price || t.target || (entryPrice * 1.02);
                             
-                            const risk = Math.abs(entryPrice - stopLoss);
-                            const reward = Math.abs(target - entryPrice);
-                            
-                            return risk > 0 && reward > 0 ? sum + (risk / reward) : sum;
-                        }, 0) / challengeTrades.length : 0;
+                            // Only calculate R:R for trades that have both stop loss and target
+                            if (t.stop_loss && (t.target || t.target_price)) {
+                                const stopLoss = t.stop_loss;
+                                const target = t.target_price || t.target;
+                                
+                                const risk = Math.abs(entryPrice - stopLoss);
+                                const reward = Math.abs(target - entryPrice);
+                                
+                                return risk > 0 && reward > 0 ? sum + (risk / reward) : sum;
+                            }
+                            return sum;
+                        }, 0) / challengeTrades.filter(t => t.stop_loss && (t.target || t.target_price)).length : 0;
                     
                     const highestProfit = challengeTrades.length > 0 ? 
                         Math.max(...challengeTrades.map(t => calculateNetPnl(t))) : 0;
@@ -8760,7 +8765,8 @@
                     const maxDrawdownPercent = challenge.startingCapital > 0 ? 
                         (Math.abs(maxDrawdown) / challenge.startingCapital) * 100 : 0;
                     
-                    document.getElementById('challenge-avg-rr').textContent = `${avgRR.toFixed(1)}:1`;
+                    const validRRTrades = challengeTrades.filter(t => t.stop_loss && (t.target || t.target_price));
+                    document.getElementById('challenge-avg-rr').textContent = validRRTrades.length > 0 ? `${avgRR.toFixed(1)}:1` : 'N/A';
                     document.getElementById('challenge-highest-profit').textContent = formatCurrency(highestProfit);
                     document.getElementById('challenge-max-drawdown').textContent = `${maxDrawdownPercent.toFixed(2)}%`;
                     
