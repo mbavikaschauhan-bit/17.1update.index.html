@@ -5735,17 +5735,21 @@
                     if (pnl > 0) wins++;
                     else if (pnl < 0) losses++;
                     
-                    // Calculate Risk:Reward ratio
+                    // Calculate Risk:Reward ratio only for trades with both stop loss and target
                     const entryPrice = trade.entry_price || 0;
                     const exitPrice = trade.exit_price || 0;
-                    const stopLoss = trade.stop_loss || (entryPrice * 0.98); // Default 2% stop loss
-                    const target = trade.target || (entryPrice * 1.02); // Default 2% target
                     
-                    const risk = Math.abs(entryPrice - stopLoss);
-                    const reward = Math.abs(target - entryPrice);
-                    
-                    if (risk > 0) totalRisk += risk;
-                    if (reward > 0) totalReward += reward;
+                    // Only calculate R:R for trades that have both stop loss and target
+                    if (trade.stop_loss && trade.target) {
+                        const stopLoss = trade.stop_loss;
+                        const target = trade.target;
+                        
+                        const risk = Math.abs(entryPrice - stopLoss);
+                        const reward = Math.abs(target - entryPrice);
+                        
+                        if (risk > 0) totalRisk += risk;
+                        if (reward > 0) totalReward += reward;
+                    }
                 });
 
                 const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
@@ -5791,10 +5795,10 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-medium" style="color: var(--text-secondary);">AVG. R:R</p>
-                                    <p class="text-2xl font-bold ${avgRR >= 1 ? 'text-green-500' : 'text-red-500'}">1:${avgRR.toFixed(1)}</p>
+                                    <p class="text-2xl font-bold ${totalRisk > 0 ? (avgRR >= 1 ? 'text-green-500' : 'text-red-500') : 'text-gray-500'}">${totalRisk > 0 ? `1:${avgRR.toFixed(1)}` : 'N/A'}</p>
                                 </div>
-                                <div class="p-3 rounded-full ${avgRR >= 1 ? 'bg-green-100' : 'bg-red-100'}">
-                                    <i data-feather="bar-chart-2" class="h-6 w-6 ${avgRR >= 1 ? 'text-green-600' : 'text-red-600'}"></i>
+                                <div class="p-3 rounded-full ${totalRisk > 0 ? (avgRR >= 1 ? 'bg-green-100' : 'bg-red-100') : 'bg-gray-100'}">
+                                    <i data-feather="bar-chart-2" class="h-6 w-6 ${totalRisk > 0 ? (avgRR >= 1 ? 'text-green-600' : 'text-red-600') : 'text-gray-600'}"></i>
                                 </div>
                             </div>
                         </div>
@@ -6010,16 +6014,20 @@
                     
                     if (pnl > 0) wins++;
                     
-                    // Calculate Risk:Reward ratio
+                    // Calculate Risk:Reward ratio only for trades with both stop loss and target
                     const entryPrice = trade.entry_price || 0;
-                    const stopLoss = trade.stop_loss || (entryPrice * 0.98);
-                    const target = trade.target || (entryPrice * 1.02);
                     
-                    const risk = Math.abs(entryPrice - stopLoss);
-                    const reward = Math.abs(target - entryPrice);
-                    
-                    if (risk > 0) totalRisk += risk;
-                    if (reward > 0) totalReward += reward;
+                    // Only calculate R:R for trades that have both stop loss and target
+                    if (trade.stop_loss && trade.target) {
+                        const stopLoss = trade.stop_loss;
+                        const target = trade.target;
+                        
+                        const risk = Math.abs(entryPrice - stopLoss);
+                        const reward = Math.abs(target - entryPrice);
+                        
+                        if (risk > 0) totalRisk += risk;
+                        if (reward > 0) totalReward += reward;
+                    }
                 });
 
                 const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
@@ -6036,8 +6044,8 @@
                 modalTotalPnl.textContent = formatCurrency(totalPnl);
                 modalTotalPnl.style.color = totalPnl >= 0 ? '#22c55e' : '#ef4444';
                 
-                modalAvgRR.textContent = `1:${avgRR.toFixed(1)}`;
-                modalAvgRR.style.color = avgRR >= 1 ? '#22c55e' : '#ef4444';
+                modalAvgRR.textContent = totalRisk > 0 ? `1:${avgRR.toFixed(1)}` : 'N/A';
+                modalAvgRR.style.color = totalRisk > 0 ? (avgRR >= 1 ? '#22c55e' : '#ef4444') : '#6b7280';
                 
                 modalTotalTrades.textContent = totalTrades.toString();
                 
